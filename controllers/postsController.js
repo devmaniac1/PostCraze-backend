@@ -9,6 +9,17 @@ const getPosts = async (req, res) => {
   }
 };
 
+const getPostsbyId = async (req, res) => {
+  try {
+    // console.log(req.params.postId);
+    const postId = req.params.postId;
+    const post = await Post.find({ _id: postId });
+    res.json(post);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
 const createPost = async (req, res) => {
   const post = req.body;
   const newPost = new Post(post);
@@ -20,4 +31,4 @@ const createPost = async (req, res) => {
   }
 };
 
-module.exports = { getPosts, createPost };
+module.exports = { getPosts, createPost, getPostsbyId };
