@@ -13,7 +13,7 @@ const getPostsbyId = async (req, res) => {
   try {
     // console.log(req.params.postId);
     const postId = req.params.postId;
-    const post = await Post.find({ _id: postId });
+    const post = await Post.findById(postId);
     res.json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -21,8 +21,13 @@ const getPostsbyId = async (req, res) => {
 };
 
 const createPost = async (req, res) => {
-  const post = req.body;
-  const newPost = new Post(post);
+  const { title, content, color } = req.body;
+  const newPost = new Post({
+    title,
+    content,
+    color,
+    comments: [],
+  });
   try {
     await newPost.save();
     res.status(201).json(newPost);
@@ -31,4 +36,27 @@ const createPost = async (req, res) => {
   }
 };
 
-module.exports = { getPosts, createPost, getPostsbyId };
+const addCommentToPost = async (req, res) => {
+  const { postId } = req.params;
+  const { comment } = req.body;
+  const newComment = {
+    comment,
+    createdAt: new Date(),
+  };
+  try {
+    const result = await Post.findByIdAndUpdate(
+      postId,
+      { $push: { comments: newComment } },
+      { new: true }
+    );
+    if (result) {
+      res.status(200).json(result);
+    } else {
+      res.status(404).json({ error: "Post not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add comment" });
+  }
+};
+
+module.exports = { getPosts, createPost, getPostsbyId, addCommentToPost };
