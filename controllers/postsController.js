@@ -1,4 +1,10 @@
 const Post = require("../models/postSchema");
+const { body, validationResult } = require('express-validator');
+
+const validateCreatePost = [
+  body('title').notEmpty().withMessage('Title is required'),
+  body('content').notEmpty().withMessage('Content is required'),
+];
 
 const getPosts = async (req, res) => {
   try {
@@ -11,6 +17,7 @@ const getPosts = async (req, res) => {
 
 const getPostsbyId = async (req, res) => {
   try {
+
     // console.log(req.params.postId);
     const postId = req.params.postId;
     const post = await Post.findById(postId);
@@ -21,7 +28,14 @@ const getPostsbyId = async (req, res) => {
 };
 
 const createPost = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { title, content, color } = req.body;
+
+
   const newPost = new Post({
     title,
     content,
@@ -59,4 +73,4 @@ const addCommentToPost = async (req, res) => {
   }
 };
 
-module.exports = { getPosts, createPost, getPostsbyId, addCommentToPost };
+module.exports = { getPosts, createPost, getPostsbyId, addCommentToPost,validateCreatePost };
